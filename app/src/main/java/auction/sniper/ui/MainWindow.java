@@ -1,42 +1,41 @@
 package auction.sniper.ui;
 
-import java.awt.Color;
-
+import java.awt.BorderLayout;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.border.LineBorder;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+
+import static auction.sniper.App.MAIN_WINDOW_NAME;
 
 public class MainWindow extends JFrame {
 
+	public static final String APPLICATION_TITLE = "Auction Sniper";
+	
 	private static final long serialVersionUID = 1L;
+	private static final String SNIPERS_TABLE_NAME = "Snipers Table";
 
-	public static final String MAIN_WINDOW_NAME = "Auction Sniper App";
-	public static final String SNIPER_STATUS_NAME = "sniper status";
-	public static final String STATUS_JOINING = "Joining";
-	public static final String STATUS_BIDDING = "Bidding";
-	public static final String STATUS_WINNING = "Winning";
-	public static final String STATUS_LOST = "Lost";
+	private final SnipersTableModel snipers;
 
-	private final JLabel sniperStatus = createLabel(STATUS_JOINING);
-
-	public MainWindow() {
-		super("Auction Sniper");
+	public MainWindow(SnipersTableModel snipers) {
+		super(APPLICATION_TITLE);
+		this.snipers = snipers;
 		setName(MAIN_WINDOW_NAME);
-		add(sniperStatus);
+		fillContentPane(makeSnipersTable());
 		pack();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setVisible(true);
+		setVisible(true); 
+	}
+	
+	private void fillContentPane(JTable snipersTable) {
+		final var contentPane = getContentPane();
+		contentPane.setLayout(new BorderLayout());
+		contentPane.add(new JScrollPane(snipersTable), BorderLayout.CENTER);
 	}
 
-	private static JLabel createLabel(String initialText) {
-		JLabel result = new JLabel(initialText);
-		result.setName(SNIPER_STATUS_NAME);
-		result.setBorder(new LineBorder(Color.BLACK));
-		return result;
-	}
-
-	public void showStatus(String status) {
-		sniperStatus.setText(status);
+	private JTable makeSnipersTable() {
+		final JTable snipersTable = new JTable(snipers);
+		snipersTable.setName(SNIPERS_TABLE_NAME);
+		return snipersTable;
 	}
 
 }
