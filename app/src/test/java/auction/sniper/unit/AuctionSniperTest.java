@@ -5,6 +5,7 @@ import static auction.sniper.SniperSnapshot.SniperState.*;
 
 import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
+
 import org.jmock.Expectations;
 import org.jmock.States;
 import org.jmock.junit5.JUnit5Mockery;

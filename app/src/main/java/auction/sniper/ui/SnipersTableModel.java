@@ -1,6 +1,11 @@
 package auction.sniper.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.table.AbstractTableModel;
+
+import com.objogate.exception.Defect;
 
 import auction.sniper.SniperListener;
 import auction.sniper.SniperSnapshot;
@@ -10,11 +15,9 @@ public class SnipersTableModel extends AbstractTableModel implements SniperListe
 
 	private static final long serialVersionUID = 1L;
 
-	private final static SniperSnapshot STARTING_UP = new SniperSnapshot("", 0, 0, SniperState.JOINING);
-
 	private final static String[] STATUS_TEXT = { "Joining", "Bidding", "Winning", "Lost", "Won" };
 
-	private SniperSnapshot snapshot = STARTING_UP;
+	private List<SniperSnapshot> snapshots = new ArrayList<>();
 
 	@Override
 	public int getColumnCount() {
@@ -23,12 +26,12 @@ public class SnipersTableModel extends AbstractTableModel implements SniperListe
 
 	@Override
 	public int getRowCount() {
-		return 1;
+		return snapshots.size();
 	}
 
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
-		return Column.at(columnIndex).valueIn(snapshot);
+		return Column.at(columnIndex).valueIn(snapshots.get(rowIndex));
 	}
 
 	@Override
@@ -38,8 +41,15 @@ public class SnipersTableModel extends AbstractTableModel implements SniperListe
 
 	@Override
 	public void sniperStateChanged(SniperSnapshot newSnapshot) {
-		this.snapshot = newSnapshot;
-		fireTableRowsUpdated(0, 0);
+		int row = rowMatching(newSnapshot);
+		snapshots.set(row, newSnapshot);
+		fireTableRowsUpdated(row, row);
+	}
+
+	public void addSniper(SniperSnapshot sniperSnapshot) {
+		int row = snapshots.size();
+		snapshots.add(sniperSnapshot);
+		fireTableRowsInserted(row, row);
 	}
 
 	public static String textFor(SniperState state) {
@@ -85,6 +95,15 @@ public class SnipersTableModel extends AbstractTableModel implements SniperListe
 		private Column(String name) {
 			this.name = name;
 		}
+	}
+
+	private int rowMatching(SniperSnapshot snapshot) {
+		for (int i = 0; i < snapshots.size(); i++) {
+			if (snapshot.isForSameItemAs(snapshots.get(i))) {
+				return i;
+			}
+		}
+		throw new Defect("Cannot find match for " + snapshot);
 	}
 
 }

@@ -34,6 +34,10 @@ public final class SniperSnapshot {
 		return new SniperSnapshot(itemId, lastPrice, lastBid, state.whenAuctionClosed());
 	}
 
+	public boolean isForSameItemAs(SniperSnapshot sniperSnapshot) {
+		return this.itemId.equals(sniperSnapshot.itemId);
+	}
+
 	public enum SniperState {
 		JOINING {
 			@Override
