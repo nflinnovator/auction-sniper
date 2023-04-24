@@ -1,39 +1,46 @@
 package auction.sniper.unit;
 
+import static auction.sniper.core.SniperSnapshot.SniperState.BIDDING;
+import static auction.sniper.core.SniperSnapshot.SniperState.LOST;
+import static auction.sniper.core.SniperSnapshot.SniperState.WINNING;
+import static auction.sniper.core.SniperSnapshot.SniperState.WON;
 import static org.hamcrest.Matchers.equalTo;
-import static auction.sniper.SniperSnapshot.SniperState.*;
 
 import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
-
 import org.jmock.Expectations;
+import org.jmock.Mockery;
 import org.jmock.States;
-import org.jmock.junit5.JUnit5Mockery;
-
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
-import auction.sniper.Auction;
-import auction.sniper.AuctionSniper;
-import auction.sniper.SniperListener;
-import auction.sniper.SniperSnapshot;
-import auction.sniper.SniperSnapshot.SniperState;
-import auction.sniper.AuctionEventListener.PriceSource;
+import auction.sniper.core.Auction;
+import auction.sniper.core.AuctionSniper;
+import auction.sniper.core.SniperListener;
+import auction.sniper.core.SniperSnapshot;
+import auction.sniper.core.AuctionEventListener.PriceSource;
+import auction.sniper.core.SniperSnapshot.SniperState;
 
-@DisplayName("Auction Sniper Test Case")
+@DisplayName("Auction Sniper Unit Test Case")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class AuctionSniperTest {
 
 	static final String ITEM_ID = "test item id";
 
-	private final JUnit5Mockery context = new JUnit5Mockery();
+	private final Mockery context = new Mockery();
 	private final States sniperState = context.states("sniper");
 	private final SniperListener sniperListener = context.mock(SniperListener.class);
 	private final Auction auction = context.mock(Auction.class);
-	private final AuctionSniper sniper = new AuctionSniper(ITEM_ID, auction, sniperListener);
+	private final AuctionSniper sniper = new AuctionSniper(ITEM_ID, auction);
+	
+    @BeforeEach
+    void addAuctionSniperListener() {
+        sniper.addSniperListener(sniperListener);
+    }
 
 	@Test
 	@Order(1)

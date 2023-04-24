@@ -12,6 +12,11 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 
+import auction.sniper.adapters.ui.SnipersTableModel;
+import auction.sniper.core.SniperPortfolio;
+import auction.sniper.core.UserRequestListener;
+import auction.sniper.shared.Announcer;
+
 import static auction.sniper.App.MAIN_WINDOW_NAME;
 
 public class MainWindow extends JFrame {
@@ -23,15 +28,12 @@ public class MainWindow extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private static final String SNIPERS_TABLE_NAME = "Snipers Table";
 
-	private final SnipersTableModel snipers;
-
 	private final Announcer<UserRequestListener> userRequests = Announcer.to(UserRequestListener.class);
 
-	public MainWindow(SnipersTableModel snipers) {
+	public MainWindow(SniperPortfolio portfolio) {
 		super(APPLICATION_TITLE);
-		this.snipers = snipers;
 		setName(MAIN_WINDOW_NAME);
-		fillContentPane(makeSnipersTable(), makeControls());
+		fillContentPane(makeSnipersTable(portfolio), makeControls());
 		pack();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
@@ -48,8 +50,10 @@ public class MainWindow extends JFrame {
 		contentPane.add(new JScrollPane(snipersTable), BorderLayout.CENTER);
 	}
 
-	private JTable makeSnipersTable() {
-		final JTable snipersTable = new JTable(snipers);
+	private JTable makeSnipersTable(SniperPortfolio portfolio) {
+		final var tableModel = new SnipersTableModel();
+		portfolio.addPortfolioListener(tableModel);
+		final var snipersTable = new JTable(tableModel);
 		snipersTable.setName(SNIPERS_TABLE_NAME);
 		return snipersTable;
 	}
@@ -60,6 +64,7 @@ public class MainWindow extends JFrame {
 		itemIdField.setColumns(25);
 		itemIdField.setName(NEW_ITEM_ID_NAME);
 		controls.add(itemIdField);
+
 		JButton joinAuctionButton = new JButton("Join Auction");
 		joinAuctionButton.setName(JOIN_BUTTON_NAME);
 		joinAuctionButton.addActionListener(new ActionListener() {
@@ -67,7 +72,9 @@ public class MainWindow extends JFrame {
 				userRequests.announce().joinAuction(itemIdField.getText());
 			}
 		});
+
 		controls.add(joinAuctionButton);
+
 		return controls;
 	}
 

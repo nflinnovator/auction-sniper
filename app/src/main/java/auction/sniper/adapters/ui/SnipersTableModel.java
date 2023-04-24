@@ -1,17 +1,20 @@
-package auction.sniper.ui;
+package auction.sniper.adapters.ui;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 
 import com.objogate.exception.Defect;
 
-import auction.sniper.SniperListener;
-import auction.sniper.SniperSnapshot;
-import auction.sniper.SniperSnapshot.SniperState;
+import auction.sniper.core.AuctionSniper;
+import auction.sniper.core.SniperListener;
+import auction.sniper.core.SniperSnapshot;
+import auction.sniper.core.SniperPortfolio.PortfolioListener;
+import auction.sniper.core.SniperSnapshot.SniperState;
 
-public class SnipersTableModel extends AbstractTableModel implements SniperListener {
+public class SnipersTableModel extends AbstractTableModel implements SniperListener, PortfolioListener {
 
 	private static final long serialVersionUID = 1L;
 
@@ -46,11 +49,18 @@ public class SnipersTableModel extends AbstractTableModel implements SniperListe
 		fireTableRowsUpdated(row, row);
 	}
 
-	public void addSniper(SniperSnapshot sniperSnapshot) {
-		int row = snapshots.size();
-		snapshots.add(sniperSnapshot);
+    @Override
+    public void sniperAdded(AuctionSniper sniper) {
+        addSniperSnapshot(sniper.getSnapshot());
+        sniper.addSniperListener(new SwingThreadSniperListener(this));
+    }
+
+	private void addSniperSnapshot(SniperSnapshot snapshot) {
+		snapshots.add(snapshot);
+		int row = snapshots.size() - 1;
 		fireTableRowsInserted(row, row);
 	}
+
 
 	public static String textFor(SniperState state) {
 		return STATUS_TEXT[state.ordinal()];
@@ -104,6 +114,20 @@ public class SnipersTableModel extends AbstractTableModel implements SniperListe
 			}
 		}
 		throw new Defect("Cannot find match for " + snapshot);
+	}
+
+	private class SwingThreadSniperListener implements SniperListener {
+
+		SniperListener sniperListener;
+
+		SwingThreadSniperListener(SniperListener listener) {
+			this.sniperListener = listener;
+		}
+
+		@Override
+		public void sniperStateChanged(SniperSnapshot state) {
+			SwingUtilities.invokeLater(() -> sniperListener.sniperStateChanged(state));
+		}
 	}
 
 }

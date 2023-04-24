@@ -1,4 +1,4 @@
-package auction.sniper.integration;
+package auction.sniper.integration.swing;
 
 import static org.hamcrest.Matchers.equalTo;
 
@@ -7,16 +7,16 @@ import org.junit.jupiter.api.Test;
 
 import com.objogate.wl.swing.probe.ValueMatcherProbe;
 
+import auction.sniper.core.SniperPortfolio;
+import auction.sniper.core.UserRequestListener;
 import auction.sniper.endtoend.AuctionSniperDriver;
 import auction.sniper.ui.MainWindow;
-import auction.sniper.ui.SnipersTableModel;
-import auction.sniper.ui.UserRequestListener;
 
 @DisplayName("Main Window Integration Test Case")
 class MainWindowTest {
 
-	private final SnipersTableModel tableModel = new SnipersTableModel();
-	private final MainWindow mainWindow = new MainWindow(tableModel);
+	private final SniperPortfolio portfolio = new SniperPortfolio();
+    private final MainWindow mainWindow = new MainWindow(portfolio);
 	private final AuctionSniperDriver driver = new AuctionSniperDriver(100);
 
 	@Test

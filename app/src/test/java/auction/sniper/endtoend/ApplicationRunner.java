@@ -2,16 +2,16 @@ package auction.sniper.endtoend;
 
 import static auction.sniper.endtoend.FakeAuctionServer.XMPP_HOSTNAME;
 import static auction.sniper.ui.MainWindow.APPLICATION_TITLE;
-import static auction.sniper.ui.SnipersTableModel.textFor;
-import static auction.sniper.SniperSnapshot.SniperState.*;
+import static auction.sniper.adapters.ui.SnipersTableModel.textFor;
+import static auction.sniper.core.SniperSnapshot.SniperState.*;
 
 import auction.sniper.App;
 
 public class ApplicationRunner {
 
-	static final String SNIPER_XMPP_ID = "sniper@56c832ad6430/Auction";
+	public static final String SNIPER_XMPP_ID = "sniper@56c832ad6430/Auction";
 	public static final String SNIPER_ID = "sniper";
-	static final String SNIPER_PASSWORD = "sniper";
+	public static final String SNIPER_PASSWORD = "sniper";
 	private AuctionSniperDriver driver;
 
 	void startBiddingIn(final FakeAuctionServer... auctions) {

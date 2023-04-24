@@ -1,4 +1,4 @@
-package auction.sniper.ui;
+package auction.sniper.core;
 
 import java.util.EventListener;
 

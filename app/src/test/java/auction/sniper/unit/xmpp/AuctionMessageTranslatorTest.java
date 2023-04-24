@@ -1,4 +1,4 @@
-package auction.sniper.unit;
+package auction.sniper.unit.xmpp;
 
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.packet.Message;
@@ -6,9 +6,9 @@ import org.jmock.Expectations;
 import org.jmock.junit5.JUnit5Mockery;
 import org.junit.jupiter.api.Test;
 
-import auction.sniper.AuctionEventListener;
-import auction.sniper.AuctionEventListener.PriceSource;
-import auction.sniper.AuctionMessageTranslator;
+import auction.sniper.core.AuctionEventListener;
+import auction.sniper.core.AuctionEventListener.PriceSource;
+import auction.sniper.xmpp.AuctionMessageTranslator;
 
 import static auction.sniper.endtoend.ApplicationRunner.SNIPER_ID;
 

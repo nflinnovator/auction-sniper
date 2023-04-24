@@ -1,17 +1,19 @@
 package auction.sniper.unit;
 
+import static auction.sniper.core.SniperSnapshot.SniperState.WINNING;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.beans.SamePropertyValuesAs.samePropertyValuesAs;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
 import org.hamcrest.Matcher;
 import org.jmock.Expectations;
-import org.jmock.junit5.JUnit5Mockery;
+import org.jmock.Mockery;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
@@ -19,17 +21,19 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
-import auction.sniper.SniperSnapshot;
-import auction.sniper.ui.SnipersTableModel;
-import auction.sniper.ui.SnipersTableModel.Column;
+import auction.sniper.adapters.ui.SnipersTableModel;
+import auction.sniper.adapters.ui.SnipersTableModel.Column;
+import auction.sniper.core.AuctionSniper;
+import auction.sniper.core.SniperSnapshot;
 
-@DisplayName("Snipers Table Model Test Case")
+@DisplayName("Snipers Table Model Unit Test Case")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class SnipersTableModelTest {
 
-	private final JUnit5Mockery context = new JUnit5Mockery();
+	private final Mockery context = new Mockery();
 	private TableModelListener listener = context.mock(TableModelListener.class);
 	private final SnipersTableModel model = new SnipersTableModel();
+	private final AuctionSniper sniper = new AuctionSniper("item 0", null);
 
 	@BeforeEach
 	public void attachModelListener() {
@@ -53,45 +57,84 @@ class SnipersTableModelTest {
 	@Test
 	@Order(3)
 	void setsSniperValuesInColumns() {
-		SniperSnapshot joining = SniperSnapshot.joining("item id");
-		SniperSnapshot bidding = joining.bidding(555, 666);
+
 		context.checking(new Expectations() {
 			{
 				allowing(listener).tableChanged(with(anyInsertionEvent()));
 				oneOf(listener).tableChanged(with(aChangeInRow(0)));
 			}
 		});
-		model.addSniper(joining);
+
+		model.sniperAdded(sniper);
+		SniperSnapshot bidding = sniper.getSnapshot();
 		model.sniperStateChanged(bidding);
+
 		assertRowMatchesSnapshot(0, bidding);
 	}
 
 	@Test
 	@Order(4)
 	void notifiesListenersWhenAddingASniper() {
-		SniperSnapshot joining = SniperSnapshot.joining("item123");
 		context.checking(new Expectations() {
 			{
 				oneOf(listener).tableChanged(with(anInsertionAtRow(0)));
 			}
 		});
+
 		assertEquals(0, model.getRowCount());
-		model.addSniper(joining);
+
+		model.sniperAdded(sniper);
+
 		assertEquals(1, model.getRowCount());
+		SniperSnapshot joining = sniper.getSnapshot();
 		assertRowMatchesSnapshot(0, joining);
 	}
 
 	@Test
+	@Order(5)
 	void holdsSnipersInAdditionOrder() {
+		AuctionSniper sniper2 = new AuctionSniper("item 1", null);
 		context.checking(new Expectations() {
 			{
 				ignoring(listener);
 			}
 		});
-		model.addSniper(SniperSnapshot.joining("item 0"));
-		model.addSniper(SniperSnapshot.joining("item 1"));
+
+		model.sniperAdded(sniper);
+		model.sniperAdded(sniper2);
+
 		assertEquals("item 0", cellValue(0, Column.ITEM_IDENTIFIER));
 		assertEquals("item 1", cellValue(1, Column.ITEM_IDENTIFIER));
+	}
+
+	@Test
+	@Order(6)
+	void updatesCorrectRowForSniper() {
+		AuctionSniper sniper2 = new AuctionSniper("item 1", null);
+		context.checking(new Expectations() {
+			{
+				allowing(listener).tableChanged(with(anyInsertionEvent()));
+
+				oneOf(listener).tableChanged(with(aChangeInRow(1)));
+			}
+		});
+
+		model.sniperAdded(sniper);
+		model.sniperAdded(sniper2);
+
+		SniperSnapshot winning1 = sniper2.getSnapshot().winning(123);
+		model.sniperStateChanged(winning1);
+
+		assertRowMatchesSnapshot(1, winning1);
+	}
+
+	@Test
+	@Order(7)
+	void throwsDefectIfNoExistingSniperForAnUpdate() {
+
+		assertThrows(RuntimeException.class, () -> {
+			model.sniperStateChanged(new SniperSnapshot("item 1", 123, 234, WINNING));
+		});
 	}
 
 	Matcher<TableModelEvent> anyInsertionEvent() {

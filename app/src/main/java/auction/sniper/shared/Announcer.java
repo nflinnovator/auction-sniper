@@ -1,4 +1,4 @@
-package auction.sniper.ui;
+package auction.sniper.shared;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.List;
 
-class Announcer<T extends EventListener> {
+public class Announcer<T extends EventListener> {
 	private final T proxy;
 	private final List<T> listeners = new ArrayList<T>();
 
