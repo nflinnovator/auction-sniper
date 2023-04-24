@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import auction.sniper.core.Auction;
 import auction.sniper.core.AuctionHouse;
 import auction.sniper.core.AuctionSniper;
+import auction.sniper.core.Item;
 import auction.sniper.core.SniperCollector;
 import auction.sniper.core.SniperLauncher;
 
@@ -28,16 +29,16 @@ class SniperLauncherTest {
 
 	@Test
 	void addsNewSniperToCollectorAndThenJoinsAuction() {
-		final String itemId = "item 123";
+		final var item = new Item("item 123", 456);
 		context.checking(new Expectations() {
 			{
-				allowing(auctionHouse).auctionFor(itemId);
+				allowing(auctionHouse).auctionFor(item);
 				will(returnValue(auction));
 
-				oneOf(auction).addAuctionEventListener(with(sniperForItem(itemId)));
+				oneOf(auction).addAuctionEventListener(with(sniperForItem(item)));
 				when(auctionState.is("not joined"));
 
-				oneOf(sniperCollector).addSniper(with(sniperForItem(itemId)));
+				oneOf(sniperCollector).addSniper(with(sniperForItem(item)));
 				when(auctionState.is("not joined"));
 
 				oneOf(auction).join();
@@ -45,11 +46,11 @@ class SniperLauncherTest {
 			}
 		});
 
-		launcher.joinAuction(itemId);
+		launcher.joinAuction(item);
 	}
 
-	private Matcher<AuctionSniper> sniperForItem(String itemId) {
-		return new FeatureMatcher<AuctionSniper, String>(equalTo(itemId), "sniper with itemId id", "itemId") {
+	private Matcher<AuctionSniper> sniperForItem(Item item) {
+		return new FeatureMatcher<AuctionSniper, String>(equalTo(item.identifier), "sniper with itemId id", "itemId") {
 			@Override
 			protected String featureValueOf(AuctionSniper actual) {
 				return actual.getSnapshot().itemId;

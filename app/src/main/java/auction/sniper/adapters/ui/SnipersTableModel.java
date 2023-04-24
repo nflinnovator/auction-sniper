@@ -18,7 +18,7 @@ public class SnipersTableModel extends AbstractTableModel implements SniperListe
 
 	private static final long serialVersionUID = 1L;
 
-	private final static String[] STATUS_TEXT = { "Joining", "Bidding", "Winning", "Lost", "Won" };
+	private final static String[] STATUS_TEXT = { "Joining", "Bidding", "Winning", "Losing", "Lost", "Won" };
 
 	private List<SniperSnapshot> snapshots = new ArrayList<>();
 
@@ -49,18 +49,17 @@ public class SnipersTableModel extends AbstractTableModel implements SniperListe
 		fireTableRowsUpdated(row, row);
 	}
 
-    @Override
-    public void sniperAdded(AuctionSniper sniper) {
-        addSniperSnapshot(sniper.getSnapshot());
-        sniper.addSniperListener(new SwingThreadSniperListener(this));
-    }
+	@Override
+	public void sniperAdded(AuctionSniper sniper) {
+		addSniperSnapshot(sniper.getSnapshot());
+		sniper.addSniperListener(new SwingThreadSniperListener(this));
+	}
 
 	private void addSniperSnapshot(SniperSnapshot snapshot) {
 		snapshots.add(snapshot);
 		int row = snapshots.size() - 1;
 		fireTableRowsInserted(row, row);
 	}
-
 
 	public static String textFor(SniperState state) {
 		return STATUS_TEXT[state.ordinal()];

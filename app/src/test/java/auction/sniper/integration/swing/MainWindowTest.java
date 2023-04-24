@@ -7,8 +7,8 @@ import org.junit.jupiter.api.Test;
 
 import com.objogate.wl.swing.probe.ValueMatcherProbe;
 
+import auction.sniper.core.Item;
 import auction.sniper.core.SniperPortfolio;
-import auction.sniper.core.UserRequestListener;
 import auction.sniper.endtoend.AuctionSniperDriver;
 import auction.sniper.ui.MainWindow;
 
@@ -16,19 +16,17 @@ import auction.sniper.ui.MainWindow;
 class MainWindowTest {
 
 	private final SniperPortfolio portfolio = new SniperPortfolio();
-    private final MainWindow mainWindow = new MainWindow(portfolio);
+	private final MainWindow mainWindow = new MainWindow(portfolio);
 	private final AuctionSniperDriver driver = new AuctionSniperDriver(100);
 
 	@Test
 	void makesUserRequestWhenJoinButtonClicked() {
-		final var buttonProbe = new ValueMatcherProbe<>(equalTo("item-id"), "join request");
-		mainWindow.addUserRequestListener(new UserRequestListener() {
-			public void joinAuction(String itemId) {
-				buttonProbe.setReceivedValue(itemId);
-			}
-		});
-		driver.startBiddingFor("item-id");
-		driver.check(buttonProbe);
+		final var itemProbe = new ValueMatcherProbe<>(equalTo(new Item("item-id", 789)), "item request");
+
+		mainWindow.addUserRequestListener(itemProbe::setReceivedValue);
+
+		driver.startBiddingFor("item-id", 789);
+		driver.check(itemProbe);
 	}
 
 }

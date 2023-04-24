@@ -1,9 +1,14 @@
 package auction.sniper.endtoend;
 
+import static auction.sniper.adapters.ui.SnipersTableModel.textFor;
+import static auction.sniper.core.SniperSnapshot.SniperState.BIDDING;
+import static auction.sniper.core.SniperSnapshot.SniperState.JOINING;
+import static auction.sniper.core.SniperSnapshot.SniperState.LOST;
+import static auction.sniper.core.SniperSnapshot.SniperState.WINNING;
+import static auction.sniper.core.SniperSnapshot.SniperState.LOSING;
+import static auction.sniper.core.SniperSnapshot.SniperState.WON;
 import static auction.sniper.endtoend.FakeAuctionServer.XMPP_HOSTNAME;
 import static auction.sniper.ui.MainWindow.APPLICATION_TITLE;
-import static auction.sniper.adapters.ui.SnipersTableModel.textFor;
-import static auction.sniper.core.SniperSnapshot.SniperState.*;
 
 import auction.sniper.App;
 
@@ -14,14 +19,16 @@ public class ApplicationRunner {
 	public static final String SNIPER_PASSWORD = "sniper";
 	private AuctionSniperDriver driver;
 
-	void startBiddingIn(final FakeAuctionServer... auctions) {
+	public void startBiddingIn(FakeAuctionServer... auctions) {
 		startSniper();
-
 		for (FakeAuctionServer auction : auctions) {
-			String itemId = auction.getItemId();
-			driver.startBiddingFor(itemId);
-			driver.showsSniperStatus(itemId, 0, 0, textFor(JOINING));
+			openBiddingFor(auction, Integer.MAX_VALUE);
 		}
+	}
+
+	public void startBiddingWithStopPrice(FakeAuctionServer auction, int stopPrice) {
+		startSniper();
+		openBiddingFor(auction, stopPrice);
 	}
 
 	public void hasShownSniperIsBidding(FakeAuctionServer auction, int lastPrice, int lastBid) {
@@ -38,6 +45,10 @@ public class ApplicationRunner {
 
 	public void showsSniperHasWonAuction(FakeAuctionServer auction, int lastPrice) {
 		driver.showsSniperStatus(auction.getItemId(), lastPrice, lastPrice, textFor(WON));
+	}
+
+	public void hasShownSniperIsLosing(FakeAuctionServer auction, int lastPrice, int lastBid) {
+		driver.showsSniperStatus(auction.getItemId(), lastPrice, lastBid, textFor(LOSING));
 	}
 
 	void stop() {
@@ -61,6 +72,12 @@ public class ApplicationRunner {
 		driver = new AuctionSniperDriver(1000);
 		driver.hasTitle(APPLICATION_TITLE);
 		driver.hasColumnTitles();
+	}
+
+	private void openBiddingFor(FakeAuctionServer auction, int stopPrice) {
+		final String itemId = auction.getItemId();
+		driver.startBiddingFor(itemId, stopPrice);
+		driver.showsSniperStatus(itemId, 0, 0, textFor(JOINING));
 	}
 
 	protected static String[] arguments(FakeAuctionServer... auctions) {

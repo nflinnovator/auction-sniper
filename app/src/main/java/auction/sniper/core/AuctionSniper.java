@@ -4,16 +4,17 @@ import auction.sniper.shared.Announcer;
 
 public class AuctionSniper implements AuctionEventListener {
 
+	 private final Item item;
 	private final Auction auction;
 	private SniperSnapshot snapshot;
 
 	private final Announcer<SniperListener> listeners = Announcer.to(SniperListener.class);
-	
-	public AuctionSniper(String itemId, Auction auction) {
-        this.auction = auction;
-        this.snapshot = SniperSnapshot.joining(itemId);
-    }
 
+	public AuctionSniper(Item item, Auction auction) {
+		this.item = item;
+        this.auction = auction;
+        this.snapshot = SniperSnapshot.joining(item.identifier);
+	}
 
 	@Override
 	public void auctionClosed() {
@@ -21,16 +22,19 @@ public class AuctionSniper implements AuctionEventListener {
 		notifyChange();
 	}
 
-	@Override
 	public void currentPrice(int price, int increment, PriceSource priceSource) {
 		switch (priceSource) {
 		case FromSniper:
 			snapshot = snapshot.winning(price);
 			break;
 		case FromOtherBidder:
-			final var bid = price + increment;
-			auction.bid(bid);
-			snapshot = snapshot.bidding(price, bid);
+			int bid = price + increment;
+			if (item.allowsBid(bid)) {
+				auction.bid(bid);
+				snapshot = snapshot.bidding(price, bid);
+			} else {
+				snapshot = snapshot.losing(price);
+			}
 			break;
 		}
 		notifyChange();

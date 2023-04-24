@@ -24,6 +24,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import auction.sniper.adapters.ui.SnipersTableModel;
 import auction.sniper.adapters.ui.SnipersTableModel.Column;
 import auction.sniper.core.AuctionSniper;
+import auction.sniper.core.Item;
 import auction.sniper.core.SniperSnapshot;
 
 @DisplayName("Snipers Table Model Unit Test Case")
@@ -33,7 +34,7 @@ class SnipersTableModelTest {
 	private final Mockery context = new Mockery();
 	private TableModelListener listener = context.mock(TableModelListener.class);
 	private final SnipersTableModel model = new SnipersTableModel();
-	private final AuctionSniper sniper = new AuctionSniper("item 0", null);
+	private final AuctionSniper sniper = new AuctionSniper(new Item("item 0", 1234), null);
 
 	@BeforeEach
 	public void attachModelListener() {
@@ -93,7 +94,7 @@ class SnipersTableModelTest {
 	@Test
 	@Order(5)
 	void holdsSnipersInAdditionOrder() {
-		AuctionSniper sniper2 = new AuctionSniper("item 1", null);
+		final var sniper2 = new AuctionSniper(new Item("item 1", 1234), null);
 		context.checking(new Expectations() {
 			{
 				ignoring(listener);
@@ -110,7 +111,7 @@ class SnipersTableModelTest {
 	@Test
 	@Order(6)
 	void updatesCorrectRowForSniper() {
-		AuctionSniper sniper2 = new AuctionSniper("item 1", null);
+		AuctionSniper sniper2 = new AuctionSniper(new Item("item 1", 1234), null);
 		context.checking(new Expectations() {
 			{
 				allowing(listener).tableChanged(with(anyInsertionEvent()));

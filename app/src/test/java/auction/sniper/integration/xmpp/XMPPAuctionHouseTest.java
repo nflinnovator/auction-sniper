@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 
 import auction.sniper.adapters.xmpp.XMPPAuctionHouse;
 import auction.sniper.core.AuctionEventListener;
+import auction.sniper.core.Item;
 import auction.sniper.endtoend.FakeAuctionServer;
 
 @DisplayName("XMPP Auction House Integration Test Case")
@@ -27,9 +28,11 @@ class XMPPAuctionHouseTest {
 
 	@Test
 	void receivesEventsFromAuctionServerAfterJoining() throws Exception {
+
 		CountDownLatch auctionWasClosed = new CountDownLatch(1);
 
-		final var auction = auctionHouse.auctionFor(auctionServer.getItemId());
+		final var auction = auctionHouse.auctionFor(new Item(auctionServer.getItemId(), 567));
+
 		auction.addAuctionEventListener(auctionClosedListener(auctionWasClosed));
 
 		auction.join();
