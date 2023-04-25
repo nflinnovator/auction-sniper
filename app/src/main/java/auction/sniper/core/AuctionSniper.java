@@ -4,7 +4,7 @@ import auction.sniper.shared.Announcer;
 
 public class AuctionSniper implements AuctionEventListener {
 
-	 private final Item item;
+	private final Item item;
 	private final Auction auction;
 	private SniperSnapshot snapshot;
 
@@ -12,8 +12,8 @@ public class AuctionSniper implements AuctionEventListener {
 
 	public AuctionSniper(Item item, Auction auction) {
 		this.item = item;
-        this.auction = auction;
-        this.snapshot = SniperSnapshot.joining(item.identifier);
+		this.auction = auction;
+		this.snapshot = SniperSnapshot.joining(item.identifier);
 	}
 
 	@Override
@@ -22,6 +22,7 @@ public class AuctionSniper implements AuctionEventListener {
 		notifyChange();
 	}
 
+	@Override
 	public void currentPrice(int price, int increment, PriceSource priceSource) {
 		switch (priceSource) {
 		case FromSniper:
@@ -38,6 +39,12 @@ public class AuctionSniper implements AuctionEventListener {
 			break;
 		}
 		notifyChange();
+	}
+
+	@Override
+	public void auctionFailed() {
+		snapshot = snapshot.failed();
+		listeners.announce().sniperStateChanged(snapshot);
 	}
 
 	public void addSniperListener(SniperListener listener) {

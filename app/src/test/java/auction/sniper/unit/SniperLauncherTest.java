@@ -53,7 +53,7 @@ class SniperLauncherTest {
 		return new FeatureMatcher<AuctionSniper, String>(equalTo(item.identifier), "sniper with itemId id", "itemId") {
 			@Override
 			protected String featureValueOf(AuctionSniper actual) {
-				return actual.getSnapshot().itemId;
+				return actual.getSnapshot().getItemId();
 			}
 		};
 	}

@@ -18,7 +18,7 @@ public class SnipersTableModel extends AbstractTableModel implements SniperListe
 
 	private static final long serialVersionUID = 1L;
 
-	private final static String[] STATUS_TEXT = { "Joining", "Bidding", "Winning", "Losing", "Lost", "Won" };
+	private final static String[] STATUS_TEXT = { "Joining", "Bidding", "Winning", "Losing", "Lost", "Won", "Failed" };
 
 	private List<SniperSnapshot> snapshots = new ArrayList<>();
 
@@ -70,25 +70,25 @@ public class SnipersTableModel extends AbstractTableModel implements SniperListe
 		ITEM_IDENTIFIER("Item") {
 			@Override
 			public Object valueIn(SniperSnapshot snapshot) {
-				return snapshot.itemId;
+				return snapshot.getItemId();
 			}
 		},
 		LAST_PRICE("Last Price") {
 			@Override
 			public Object valueIn(SniperSnapshot snapshot) {
-				return snapshot.lastPrice;
+				return snapshot.getLastPrice();
 			}
 		},
 		LAST_BID("Last Bid") {
 			@Override
 			public Object valueIn(SniperSnapshot snapshot) {
-				return snapshot.lastBid;
+				return snapshot.getLastBid();
 			}
 		},
 		SNIPER_STATE("State") {
 			@Override
 			public Object valueIn(SniperSnapshot snapshot) {
-				return SnipersTableModel.textFor(snapshot.state);
+				return SnipersTableModel.textFor(snapshot.getState());
 			}
 
 		};

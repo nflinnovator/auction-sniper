@@ -55,6 +55,10 @@ public class FakeAuctionServer {
 		receivesAMessageMatching(sniperId, equalTo(String.format(BID_COMMAND_FORMAT, bid)));
 	}
 
+	public void sendInvalidMessageContaining(String brokenMessage) throws XMPPException {
+		currentChat.sendMessage(brokenMessage);
+	}
+
 	public void announceClosed() throws XMPPException {
 		currentChat.sendMessage("SOLVersion: 1.1; Event: CLOSE;");
 	}

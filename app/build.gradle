@@ -37,6 +37,18 @@ dependencies {
     // https://mvnrepository.com/artifact/org.igniterealtime.smack/smack
     implementation 'org.igniterealtime.smack:smack:3.1.0'
     implementation 'org.igniterealtime.smack:smackx:3.1.0'
+    
+    // A package of Java utility classes for the classes that are in java.lang's hierarchy,
+    // or are considered to be so standard as to justify existence in java.lang.
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
+    
+    //  The Apache Commons IO library contains utility classes,
+    // stream implementations, file filters, file comparators, endian transformation classes, and much more. 
+    implementation 'commons-io:commons-io:2.11.0'
+    
+    // https://mvnrepository.com/artifact/org.jmock/jmock-legacy 
+    testImplementation 'org.jmock:jmock-legacy:2.12.0'
+    
 }
 
 application {

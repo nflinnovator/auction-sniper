@@ -13,20 +13,26 @@ import org.jivesoftware.smack.XMPPException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import auction.sniper.adapters.xmpp.XMPPAuctionHouse;
 import auction.sniper.core.AuctionEventListener;
 import auction.sniper.core.Item;
 import auction.sniper.endtoend.FakeAuctionServer;
+import auction.sniper.xmpp.XMPPAuctionException;
 
 @DisplayName("XMPP Auction House Integration Test Case")
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class XMPPAuctionHouseTest {
 
 	private final FakeAuctionServer auctionServer = new FakeAuctionServer("item-54321");
 	private XMPPAuctionHouse auctionHouse;
 
 	@Test
+	@Order(1)
 	void receivesEventsFromAuctionServerAfterJoining() throws Exception {
 
 		CountDownLatch auctionWasClosed = new CountDownLatch(1);
@@ -54,11 +60,16 @@ class XMPPAuctionHouseTest {
 			public void currentPrice(int price, int increment, PriceSource priceSource) {
 				// no op
 			}
+
+			@Override
+			public void auctionFailed() {
+
+			}
 		};
 	}
 
 	@BeforeEach
-	void createConnection() throws XMPPException {
+	void createConnection() throws XMPPException, XMPPAuctionException {
 		auctionHouse = XMPPAuctionHouse.connect(XMPP_HOSTNAME, SNIPER_ID, SNIPER_PASSWORD);
 	}
 

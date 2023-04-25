@@ -16,17 +16,34 @@ public class AuctionMessageTranslator implements MessageListener {
 
 	private final AuctionEventListener listener;
 
-	public AuctionMessageTranslator(String sniperId, AuctionEventListener listener) {
-		this.sniperId = sniperId; 
+	private XMPPFailureReporter failureReporter;
+
+	public AuctionMessageTranslator(String sniperId, AuctionEventListener listener,
+			XMPPFailureReporter failureReporter) {
+		this.sniperId = sniperId;
 		this.listener = listener;
+		this.failureReporter = failureReporter;
 	}
 
+	@Override
 	public void processMessage(Chat chat, Message message) {
-		final var event = AuctionEvent.from(message.getBody());
-		String eventType = event.type();
-		if ("CLOSE".equals(eventType)) {
+		String messageBody = message.getBody();
+
+		try {
+			translate(messageBody);
+		} catch (Exception e) {
+			failureReporter.cannotTranslateMessage(sniperId, messageBody, e);
+			listener.auctionFailed();
+		}
+	}
+
+	private void translate(String messageBody) throws Exception {
+		AuctionEvent event = AuctionEvent.from(messageBody);
+
+		String type = event.type();
+		if ("CLOSE".equals(type)) {
 			listener.auctionClosed();
-		} else if ("PRICE".equals(eventType)) {
+		} else if ("PRICE".equals(type)) {
 			listener.currentPrice(event.currentPrice(), event.increment(), event.isFrom(sniperId));
 		}
 	}
@@ -34,15 +51,15 @@ public class AuctionMessageTranslator implements MessageListener {
 	private static final class AuctionEvent {
 		private final Map<String, String> fields = new HashMap<String, String>();
 
-		public String type() {
+		public String type() throws MissingValueException {
 			return get("Event");
 		}
 
-		public int currentPrice() {
+		public int currentPrice() throws MissingValueException {
 			return getInt("CurrentPrice");
 		}
 
-		public int increment() {
+		public int increment() throws MissingValueException {
 			return getInt("Increment");
 		}
 
@@ -71,12 +88,22 @@ public class AuctionMessageTranslator implements MessageListener {
 			return messageBody.split(";");
 		}
 
-		public PriceSource isFrom(String sniperId) {
+		public PriceSource isFrom(String sniperId) throws MissingValueException {
 			return sniperId.equals(bidder()) ? PriceSource.FromSniper : PriceSource.FromOtherBidder;
 		}
 
-		private String bidder() {
+		private String bidder() throws MissingValueException {
 			return get("Bidder");
+		}
+	}
+
+	private static class MissingValueException extends RuntimeException {
+
+		private static final long serialVersionUID = 1L;
+
+		@SuppressWarnings("unused")
+		MissingValueException(String fieldName) {
+			super(fieldName);
 		}
 	}
 
